@@ -10,15 +10,6 @@ if(empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])){
 if($_SESSION['role'] != 1){
   header('location: login.php');
 }
-if(!empty($_POST['search'])){
-  unset($_COOKIE['search']);
-  setcookie('search',$_POST['search'],time() + (84600 * 30),"/");
-}else{
-  //remove cookie when pageno is empty because first time page cannot contain pageno and click pagination next or last, it will set pageno.
-  if(empty($_GET['pageno'])) { 
-    setcookie('search',null,-1 ,'/');
-  }
-}
 
 if(!empty($_GET['pageno'])){
   $pageno = $_GET['pageno'];
@@ -28,35 +19,17 @@ if(!empty($_GET['pageno'])){
 $numOfrecs = 5;
 $offset = ($pageno - 1) * $numOfrecs;
 
-if(empty($_POST['search']) && empty($_COOKIE['search'])){
-
-    $stmt =$pdo->prepare("SELECT * FROM categories ORDER BY id DESC");
+    $stmt =$pdo->prepare("SELECT * FROM sale_order_detail WHERE sale_order_id=".$_GET['id']);
     $stmt->execute();
     $rawresult = $stmt->fetchAll();
 
     $total_pages = ceil(count($rawresult) / $numOfrecs);
    
-    $stmt =$pdo->prepare("SELECT * FROM categories ORDER BY id DESC LIMIT $offset,$numOfrecs");
+    $stmt =$pdo->prepare("SELECT * FROM sale_order_detail WHERE sale_order_id=".$_GET['id']." LIMIT $offset,$numOfrecs");
     $stmt->execute();
     $result = $stmt->fetchAll();
 
-  }else{
-    if(!empty($_POST['search'])){
-        $searchKey = $_POST['search'] ;
-    }else {
-        $searchKey = $_COOKIE['search'];
-      }                    
-  $stmt = $pdo->prepare("SELECT * FROM categories WHERE name LIKE '%$searchKey%' ORDER BY id DESC");
-  $stmt->execute();
-  $rawresult = $stmt->fetchAll();
-
-  $total_pages = ceil(count($rawresult) / $numOfrecs);
-   
-  $stmt =$pdo->prepare("SELECT * FROM categories WHERE name LIKE '%$searchKey%' ORDER BY id DESC LIMIT $offset,$numOfrecs");
-  $stmt->execute();
-  $result = $stmt->fetchAll();
   
-  } 
 ?>
 
 <?php include('header.php'); ?>
@@ -76,43 +49,37 @@ if(empty($_POST['search']) && empty($_COOKIE['search'])){
           <div class="col-md-12">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Category</h3>
+                <h3 class="card-title">Order Detail</h3>
               </div>
                
               <div class="card-body">
-                <!-- /Create new blog button -->
                 <div style="margin-bottom: 13px">
-                  <a href="cat_add.php" type="button" class="btn btn-success">New Category</a>
+                  <a href="order_list.php" type="button" class="btn btn-warning">Back</a>
                 </div>
-
                 <table class="table table-bordered">
                   <thead>                  
                     <tr>
                       <th style="width: 10px">#</th>
-                      <th>Name</th>
-                      <th>Description</th>
-                      <th style="width: 40px">Action</th>
+                      <th>Product</th>
+                      <th> Quantity</th>
+                      <th>Order Date</th>
                     </tr>
                   </thead>
                    <tbody>
                   <?php 
                       if($result){
                       $i = 1;
-                        foreach($result as $value){  ?>
+                        foreach($result as $value){
+                          $pstmt =$pdo->prepare("SELECT * FROM products WHERE id=".$value['product_id']);
+                          $pstmt->execute();
+                          $pResult = $pstmt->fetchAll();
+
+                  ?>
                     <tr>
                       <td><?php echo $i; ?></td>
-                      <td><?php echo escape($value['name'])?></td>
-                      <td><?php echo escape(substr( $value['description'],0,80))?></td>
-                      <td>
-                        <div class="btn-group">
-                          <div class="container">
-                              <a href="cat_edit.php?id=<?php echo $value['id']; ?>" type="button" class="btn btn-success">Edit</a>
-                          </div>
-                          <div class="container">
-                               <a href="cat_delete.php?id=<?php echo $value['id']; ?>" type="button" class="btn btn-danger" onclick="return confirm('Are you sure you want to Delete')">Delete</a>
-                          </div>
-                        </div>
-                      </td>
+                      <td><?php echo escape($pResult[0]['name'])?></td>
+                      <td><?php echo escape($value['quantity'])?></td>
+                      <td><?php echo escape(date('Y-m-d',strtotime($value['order_date'])))?></td>
                     </tr>
                   </tbody>
                   <?php
@@ -151,3 +118,4 @@ if(empty($_POST['search']) && empty($_COOKIE['search'])){
   <!-- Control Sidebar -->
 
 <?php include('footer.php'); ?>
+

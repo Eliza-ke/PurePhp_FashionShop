@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-  <title>Welcome to Shopping</title>
+  <title>Fashion Shopping</title>
 
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
@@ -34,26 +34,38 @@
     ?>
 
     <!-- SEARCH FORM -->
-    <form class="form-inline ml-3" method="post" 
-    <?php if ($page == 'index.php') :?>
-      action = "index.php"
-    <?php elseif ($page == 'category.php') :?>
-      action = "category.php"
-    <?php elseif ($page == 'user_list.php') :?>
-      action = "user_list.php"
-    <?php endif; ?>
+    <?php if ($page == 'index.php' || $page == 'category.php' || $page == 'user_list.php' ) { ?>
+
+      <form class="form-inline ml-3" method="post" 
+      <?php if ($page == 'index.php') :?>
+        action = "index.php"
+      <?php elseif ($page == 'category.php') :?>
+        action = "category.php"
+      <?php elseif ($page == 'user_list.php') :?>
+        action = "user_list.php"
+      <?php endif; ?>
     >
 
       <input type="hidden" name="csrf" value="<?php echo $_SESSION['csrf']; ?>">
       <div class="input-group input-group-sm">
-        <input name="search" class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
+        <input name="search" class="form-control form-control-navbar" type="search" aria-label="Search" value="" placeholder="search">
+        <!--  
+        <?php if(!empty ($_POST['search']) || !empty($_COOKIE['search'])) :?>
+          <?php $searchKey = !empty($_POST['search']) ? $_POST['search'] : $_COOKIE['search']; ?>
+            value="<?php echo $searchKey ?>"
+        <?php else :?>
+          placeholder=" <?php echo "search" ?>"  
+        <?php endif; ?>
+        >
+        -->
         <div class="input-group-append">
-          <button class="btn btn-navbar" type="submit">
+          <button class="btn btn-navbar" type="submit href=">
             <i class="fas fa-search"></i>
           </button>
         </div>
       </div>
     </form>
+  <?php } ?>
   </nav>
   <!-- /.navbar -->
 
@@ -62,7 +74,7 @@
     <a href="#" class="brand-link">
       <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
            style="opacity: .8">
-      <span class="brand-text font-weight-light">BlogPanel</span>
+      <span class="brand-text font-weight-light">Shopping Panel</span>
     </a>
 
     <!-- Sidebar -->
@@ -81,7 +93,7 @@
       <nav class="mt-2">
        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">   
           <li class="nav-item">
-            <a href="index.php" class="nav-link">
+            <a href="index.php" class="nav-link"> <!-- use the js to onclick to remove cookie value -->
               <i class="nav-icon fas fa-th"></i>
               <p> Product </p>             
             </a>
@@ -96,6 +108,12 @@
             <a href="user_list.php" class="nav-link">
               <i class="nav-icon fas fa-user"></i>
               <p> User </p>             
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="order_list.php" class="nav-link">
+              <i class="nav-icon fas fa-table"></i>
+              <p> Sale Order </p>             
             </a>
           </li>
 
