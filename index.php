@@ -10,8 +10,7 @@ if(!empty($_POST['search'])){
 }
 ?>
 
-<?php include('header.php') ?>
-<?php 
+<?php include('header.php') ;
 	require 'config/config.php';
 
      if(!empty($_GET['pageno'])) {
@@ -27,28 +26,30 @@ if(!empty($_POST['search'])){
      	if(!empty($_GET['category_id'])){
 
      		$categoryId = $_GET['category_id'];
-        	$stmt =$pdo->prepare("SELECT * FROM products WHERE category_id=:category_id ORDER BY id DESC");
+
+        	$stmt =$pdo->prepare("SELECT * FROM products WHERE category_id=:category_id AND quantity >0 ORDER BY id DESC");
        		$stmt->execute(array(':category_id'=>$categoryId));
         	$rawresult = $stmt->fetchAll();
-        	$total_pages = ceil(count($rawresult) / $numOfrecs);      
+        	$total_pages = ceil(count($rawresult) / $numOfrecs); 
 
-        	$stmt =$pdo->prepare("SELECT * FROM products WHERE category_id=:category_id ORDER BY id DESC LIMIT $offset,
-                        $numOfrecs");
+        	#pagination
+        	$stmt =$pdo->prepare("SELECT * FROM products WHERE category_id=:category_id AND quantity >0 ORDER BY id DESC LIMIT 
+        		$offset,$numOfrecs");
         	$stmt->execute(array(':category_id'=>$categoryId));
         	$result = $stmt->fetchAll();
         }else{
 
-        	$stmt =$pdo->prepare("SELECT * FROM products ORDER BY id DESC");
+        	$stmt =$pdo->prepare("SELECT * FROM products WHERE quantity >0  ORDER BY id DESC");
        		$stmt->execute();
         	$rawresult = $stmt->fetchAll();
         	$total_pages = ceil(count($rawresult) / $numOfrecs);
 
-        	$stmt =$pdo->prepare("SELECT * FROM products ORDER BY id DESC LIMIT $offset,$numOfrecs");
+        	$stmt =$pdo->prepare("SELECT * FROM products WHERE quantity >0  ORDER BY id DESC LIMIT $offset,$numOfrecs");
         	$stmt->execute();
         	$result = $stmt->fetchAll();
         }
 
-      } else{
+      }else{
         	if(!empty($_POST['search'])){
             	$searchKey = $_POST['search'] ;
        		 }else {
@@ -58,24 +59,23 @@ if(!empty($_POST['search'])){
              if(!empty($_GET['category_id'])){
 
              	$categoryId = $_GET['category_id'];
-        		$stmt = $pdo->prepare("SELECT * FROM products WHERE category_id=:category_id AND name LIKE '%$searchKey%' ORDER BY id DESC");
-        			$stmt->execute(array(':category_id'=>$categoryId));
+        		$stmt = $pdo->prepare("SELECT * FROM products WHERE category_id=:category_id AND quantity >0  AND name LIKE '%$searchKey%' ORDER BY id DESC");
+        		$stmt->execute(array(':category_id'=>$categoryId));
         		$rawresult = $stmt->fetchAll();
         		$total_pages = ceil(count($rawresult) / $numOfrecs);
 
-
         		
-        		$stmt =$pdo->prepare("SELECT * FROM products WHERE category_id=:category_id AND name LIKE '%$searchKey%' ORDER BY id DESC LIMIT $offset,$numOfrecs");
+        		$stmt =$pdo->prepare("SELECT * FROM products WHERE category_id=:category_id AND quantity >0 AND name LIKE '%$searchKey%' ORDER BY id DESC LIMIT $offset,$numOfrecs");
         		$stmt->execute(array(':category_id'=>$categoryId));
         		$result = $stmt->fetchAll();
         	}else{
 
-        		$stmt = $pdo->prepare("SELECT * FROM products WHERE name LIKE '%$searchKey%' ORDER BY id DESC");
+        		$stmt = $pdo->prepare("SELECT * FROM products WHERE name LIKE '%$searchKey%' AND quantity >0 ORDER BY id DESC");
         			$stmt->execute();
         		$rawresult = $stmt->fetchAll();
         		$total_pages = ceil(count($rawresult) / $numOfrecs);
 
-        		$stmt =$pdo->prepare("SELECT * FROM products WHERE name LIKE '%$searchKey%' ORDER BY id DESC LIMIT $offset,$numOfrecs");
+        		$stmt =$pdo->prepare("SELECT * FROM products WHERE name LIKE '%$searchKey%' AND quantity >0  ORDER BY id DESC LIMIT $offset,$numOfrecs");
         		$stmt->execute();
         		$result = $stmt->fetchAll();
         }   
@@ -88,6 +88,7 @@ if(!empty($_POST['search'])){
 				<div class="sidebar-categories">
 					<div class="head">Browse Categories</div>
 					<ul class="main-categories">
+						<li class="main-nav-list">
 						<?php
 
 							$catstmt = $pdo->prepare("SELECT * FROM categories ORDER BY id DESC");
@@ -158,15 +159,21 @@ if(!empty($_POST['search'])){
 											<h6><?php echo escape($value['price'])?></h6>
 
 											<div class="prd-bottom">
-
-												<a href="" class="social-info">
-													<span class="ti-bag"></span>
-													<p class="hover-text">add to bag</p>
-												</a>
+											<form action="addtocart.php" method="post">
+												<input type="hidden" name="csrf" value="<?php echo $_SESSION['csrf']; ?>">
+												<input type="hidden" name="id" value="<?php echo $value['id'] ?>">
+												<input type="hidden" name="qty" value="1">
+												<div class="social-info">
+													<button style="display:contents" class="social-info" type="submit">
+														<span class="ti-bag"></span>
+														<p class="hover-text" style="left: 25px">add to bag</p>
+													</button>
+												</div>
 												<a href="product_detail.php?id=<?php echo $value['id']; ?>" class="social-info">
 													<span class="lnr lnr-move"></span>
 													<p class="hover-text">view more</p>
 												</a>
+											</form>
 											</div>
 										</div>
 									</div>

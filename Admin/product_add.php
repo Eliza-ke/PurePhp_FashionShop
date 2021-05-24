@@ -32,35 +32,45 @@ if($_POST){
     }
      if(empty($quantity)){
       $qtyError ='Quantity is required';
-    }elseif ((!empty($quantity)) && is_numeric($quantity) != 1) {
+    }
+    elseif ((!empty($quantity)) && is_numeric($quantity) != 1) {
       $qtyError ='Quantity should be number';
     }
      if(empty($price)){
       $priceError ='Price is required';
-    }elseif ((!empty($price)) && is_numeric($price) != 1) {
+    }
+    elseif ((!empty($price)) && is_numeric($price) != 1) {
       $priceError ='Price should be number';
     }
      if(empty($image)){
       $imageError ='Image is required';
     }
   }else{
-    $file ='images/'.$image;
-    $imageType =pathinfo($file,PATHINFO_EXTENSION);
-
-    if($imageType !='png' && $imageType !='jpg' && $imageType !='jpeg'){
-      echo "<script>alert('Image should be png,jpg,jpeg')</script>";
-
+    if(is_numeric($_POST['quantity']) !=1){
+      $qtyError ='Quantity should be number';
     }
-    else{
-    move_uploaded_file($_FILES['image']['tmp_name'], $file);
+    if(is_numeric($_POST['price']) !=1){
+      $priceError ='Price should be number';
+    }
+    if($qtyError =='' && $priceError == ''){
+      $file ='images/'.$image;
+      $imageType =pathinfo($file,PATHINFO_EXTENSION);
 
-    $stmt = $pdo->prepare("INSERT INTO products (name,description,category_id,quantity,price,image) VALUES (:name,:description,:category,:quantity,:price,:image)");
+      if($imageType !='png' && $imageType !='jpg' && $imageType !='jpeg'){
+        echo "<script>alert('Image should be png,jpg,jpeg')</script>";
 
-    $result = $stmt->execute(array(':name'=>$name,':description'=>$description,':category'=>$category,
+      }
+      else{
+      move_uploaded_file($_FILES['image']['tmp_name'], $file);
+
+      $stmt = $pdo->prepare("INSERT INTO products (name,description,category_id,quantity,price,image) VALUES (:name,:description,:category,:quantity,:price,:image)");
+
+      $result = $stmt->execute(array(':name'=>$name,':description'=>$description,':category'=>$category,
       ':quantity'=>$quantity,':price'=>$price,':image'=>$image));
 
-    if($result){
-      echo "<script>alert('Product added');window.location.href='index.php'</script>";
+      if($result){
+        echo "<script>alert('Product added');window.location.href='index.php'</script>";
+        }
       }
     }
   }

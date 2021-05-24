@@ -44,7 +44,13 @@ if($_POST){
     }
 
   }else{
-
+    if(is_numeric($_POST['quantity']) !=1){
+      $qtyError ='Quantity should be number';
+    }
+    if(is_numeric($_POST['price']) !=1){
+      $priceError ='Price should be number';
+    }
+    if($qtyError =='' && $priceError == ''){
       if (!empty($_FILES['image']['name'])) {
         $file ='images/'.($_FILES['image']['name']);
         $imageType =pathinfo($file,PATHINFO_EXTENSION);
@@ -85,7 +91,8 @@ if($_POST){
           if($result){
               echo "<script>alert('Product Updated');window.location.href='index.php'</script>";
           }   
-    }       
+    }      
+    } 
   }
 }
 ?>
